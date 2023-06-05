@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: List
+items:
+-
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: wp-db
+      app.kubernetes.io/component: wp-db
+      app.kubernetes.io/instance: wp-db
+      app.kubernetes.io/part-of: wp-db
+      app.openshift.io/runtime: redhat
+    name: wp-db
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: wp-db
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: wp-db
+          deploymentconfig: wp-db
+      spec:
+        containers:
+        - env:
+          - name: MYSQL_DATABASE
+            value: mysqldatabase
+          - name: MYSQL_PASSWORD
+            value: mysqlpassword
+          - name: MYSQL_ROOT_PASSWORD
+            value: sd;jcknalsjdvsadchbch
+          - name: MYSQL_USER
+            value: mysqluser
+          image: rhel8/mysql-80:latest
+          imagePullPolicy: Always
+          name: wp-db
+          ports:
+          - containerPort: 3306
+            name: mysql
+            protocol: TCP
+-
+  apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: wp-host
+      app.kubernetes.io/component: wp-db
+      app.kubernetes.io/instance: wp-db
+      app.kubernetes.io/part-of: wp-db
+      app.openshift.io/runtime: redhat
+    name: wp-db-svc
+  spec:
+    ports:
+    - port: 3306
+      protocol: TCP
+      targetPort: 3306
+      name: mysql
+    selector:
+      app: wp-db
